@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Merge and Display with Image Maps</title>
+	<style>
+	
+	
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+			height:100vh;	
+			
+        }
+		
+		#backd{
+			width:100vw;
+			height:100vh;
+            background: rgb(130,0,84);
+			background: linear-gradient(0deg, rgba(255,0,99,1) 0%, rgba(97,9,121,1) 100%);
+			position:fixed;
+			z-index:-1000;
+		
+		}
+		
+		#fored{
+			width:100vw;
+			height:100vh;
+            background: rgb(0,0,0,0.6);
+			position:fixed;
+			z-index:1000;
+			
+			justify-content: center;
+			display:none;
+			flex-direction:column;
+			align-items:center;
+		
+		}
+		#result{
+			height:90vh;
+			width:auto;
+			
+		}
+		
+		
+		nav{
+			font-family: "Berlin Sans FB", sans-serif;
+			padding:20px;
+			background-color:#490a6b;
+			color: white;
+			display: flex;
+			justify-content: center
+		}
+		
+		
+
+        #imageForm {
+            margin-top: 20px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+			color: #ff0063;
+        }
+
+		#inner1{ 
+			width:400px;
+			padding: 60px;
+			background-color: #490a6b;
+			border-radius: 40px 40px 0px 40px;
+		}
+        input[type="url"] {
+		
+			font-family: "Berlin Sans FB", sans-serif;
+            width:80%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="button"] {
+		
+			font-family: "Berlin Sans FB", sans-serif;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #mergedCanvas {
+			height:500px;
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+			box-shadow: 0 0 5px white;
+        }
+		
+		#containcnvas{
+			width: 100%;
+			display: flex;
+			justify-content: center;
+		}
+		
+
+        #mapresult {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: left;
+			color:white;
+			background-color:#888;
+			border: 1px solid #999;
+			border-radius:4px;
+			font-family: "Berlin Sans FB", sans-serif;
+			text-align: center;
+			box-shadow: 0 0 5px white;
+			padding-horizontal: 20px;
+			line-height: 2;
+			width: 20%;
+			font-size: inherit;
+        }
+		#cancelit{
+		color:white;
+		font-weight:bold;
+			position:fixed;
+			padding:50px;
+			right:0;
+			top:0;
+			cursor:pointer;
+		}
+    </style>
+</head>
+<body>
+	<div id="backd" ></div>
+	<div id="fored" >
+		<div id="cancelit" >X</div>
+		<div id="mapresult"></div>
+		<canvas id="mergedCanvas" style="display: none;" usemap="#imageMap"></canvas>
+	</div>
+	<nav >
+		<h1> BMS Image Merging </h1>
+	</nav>
+    <form id="imageForm">
+		<div id="inner1">
+			<input placeholder="url to image" type="url" id="image1Url" name="image1Url"><br><br>
+
+			<input placeholder="url to image" type="url" id="image2Url" name="image2Url"><br><br>
+
+			<input placeholder="url to image" type="url" id="image3Url" name="image3Url"><br><br>
+
+			<input type="button" value="Merge and Display Map" id="sub">
+			
+		</div>
+    </form>
+	<div id="containcnvas">
+    
+	</div>
+	<br>
+	
+    <script>
+        const imageForm = document.getElementById('imageForm');
+        const image1UrlInput = document.getElementById('image1Url');
+        const image2UrlInput = document.getElementById('image2Url');
+        const image3UrlInput = document.getElementById('image3Url');
+        const mergedCanvas = document.getElementById('mergedCanvas');
+        const mapelement = document.getElementById('mapping');
+        const ctx = mergedCanvas.getContext('2d');
+		const rslt = document.getElementById('result');
+		const rsltdiv = document.getElementById('fored');
+		const cancelo = document.getElementById('cancelit');
+		const suber = document.getElementById('sub');
+		
+		cancelo.addEventListener('click',()=>{rsltdiv.style.display="none";})
+
+        suber.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const image1Url = image1UrlInput.value;
+            const image2Url = image2UrlInput.value;
+            const image3Url = image3UrlInput.value;
+
+            if (image1Url && image2Url && image3Url) {
+                const image1 = new Image();
+                const image2 = new Image();
+                const image3 = new Image();
+
+                image1.src = image1Url;
+                image2.src = image2Url;
+                image3.src = image3Url;
+
+                image1.onload = image2.onload = image3.onload = function () {
+				
+                    mergedCanvas.width = image1.width;
+                    mergedCanvas.height = image1.height + image2.height + image3.height;
+
+                    ctx.drawImage(image1, 0, 0);
+					let b2= 0;
+					b2 = (image1.width-image2.width)/2;
+                    ctx.drawImage(image2, b2, image1.height);
+					let b3= 0;
+					b3 = (image1.width-image3.width)/2;
+                    ctx.drawImage(image3, b3, image1.height + image2.height);
+					rsltdiv.style.display= 'flex'
+                    mergedCanvas.style.display = 'block';
+
+                    URL.revokeObjectURL(image1.src);
+                    URL.revokeObjectURL(image2.src);
+                    URL.revokeObjectURL(image3.src);
+					
+					let sx=0;
+					ex1=image1.width;
+					let ex=image1.width;
+					let y1=image1.height;
+					let y2=y1+image2.height;
+					let y3 =y2+image3.height;
+					
+					let s="zrfrfz"
+					s='0,0,'+ex+','+y1+'\n';
+					s+='0,'+y1+','+ex+','+y2+'\n';
+					s+='0,'+y2+','+ex+','+y3+'\n';
+					
+					document.getElementById("mapresult").innerText=s;
+					
+					
+                };
+            }
+        });
+		
+    </script>
+</body>
+</html>
